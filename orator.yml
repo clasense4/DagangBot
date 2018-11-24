@@ -1,0 +1,8 @@
+databases:
+    development:
+        driver: mysql
+        host: localhost
+        database: dagang_bot
+        user: root
+        password: ''
+        prefix: ''
