@@ -4,6 +4,14 @@
 
 Simple telegram bot using orator as database manager. This bot will simulate how ecommerce works by using telegram bot.
 
+## Commands
+
+```
+/help
+/register
+/cart
+```
+
 
 ## Requirements
 
