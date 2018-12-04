@@ -19,6 +19,7 @@ Simple telegram bot using orator as database manager. This bot will simulate how
 virtualenv -p `which python3` env
 source env/bin/activate
 pip3 install -r requirements.txt
+orator migrate --force
 ```
 
 ## Configuration
