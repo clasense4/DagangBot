@@ -62,7 +62,7 @@ def start(bot, update):
 
 def register(bot, update):
     try:
-        is_registered = db.table('users').where('telegram_id', update.message.chat.id).first()
+        is_registered = db.table('backend_user').where('telegram_id', update.message.chat.id).first()
 
         if is_registered == None:
             users = {
@@ -72,7 +72,7 @@ def register(bot, update):
                 'telegram_id': update.message.chat.id,
                 'register_date': update.message.date
             }
-            db.table('users').insert(users)
+            db.table('backend_user').insert(users)
             update.message.reply_text('Register Success.')
         else:
             update.message.reply_text('Already Registered.')
@@ -98,7 +98,7 @@ def unknown(bot, update):
 
 def product(bot, update):
     prices = '*Produk* : \n'
-    products = db.table('products').get()
+    products = db.table('backend_product').get()
     for product in products:
         strings = str(product['id']) + '. ' + product['name'] + ' = ' + str(product['price']) + '\n'
         prices += strings
@@ -110,7 +110,7 @@ def product(bot, update):
     )
 
 def search_product(search_string):
-    return db.table('products').where('name', 'like', "%" + search_string + "%").first()
+    return db.table('backend_product').where('name', 'like', "%" + search_string + "%").first()
 
 def order(bot, update, args):
     if len(args) == 2:
