@@ -76,11 +76,8 @@ WSGI_APPLICATION = 'dagangweb.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'localhost',
-        'NAME': 'dagang_bot',
-        'USER': 'root',
-        'PASSWORD': ''
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'dagang_bot.sqlite'
     }
 }
 

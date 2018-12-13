@@ -1,8 +1,4 @@
 databases:
     development:
-        driver: mysql
-        host: localhost
-        database: dagang_bot
-        user: root
-        password: ''
-        prefix: ''
+        driver: sqlite
+        database: C:\Users\Leriana\projects\DagangBot\dagangweb\dagang_bot.sqlite
