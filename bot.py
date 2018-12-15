@@ -114,8 +114,30 @@ def search_product(search_string):
 
 def order(bot, update, args):
     if len(args) == 2:
-        if search_product(args[0]):
-            message = 'Product found, creating order'
+        product_name = args[0]
+        quantity = args[1]
+
+        product = search_product(product_name)
+        user = db.table('backend_user').where('telegram_id', update.message.chat.id).first()
+
+        if product:
+            message = 'Added to cart'
+            item_cart = db.table('backend_cart').where('user_id', user['id']).where('product_id', product['id']).first()
+
+            if item_cart == None:
+                cart = {
+                    'user_id': user['id'],
+                    'product_id': product['id'],
+                    'quantity': quantity
+                }
+                db.table('backend_cart').insert(cart)
+                message = 'Item added to cart'
+            else:
+                message = 'Item added to cart, updating the quantity'
+                prev_quantity = item_cart['quantity']
+                new_quantity = item_cart['quantity'] + int(quantity)
+                db.table('backend_cart').where('id', item_cart['id']).update({'quantity': new_quantity})
+
         else:
             message = 'Product not found'
 
