@@ -102,7 +102,7 @@ def product(bot, update):
     prices = '*Produk* : \n'
     products = db.table('backend_product').get()
     for product in products:
-        strings = str(product['id']) + '. ' + product['name'] + ' = ' + str(product['price']) + '\n'
+        strings = str(product['id']) + '. ' + product['name'] + ' = ' + str("{:,}".format(product['price'])) + '\n'
         prices += strings
 
     bot.send_message(
@@ -171,11 +171,11 @@ def cart(bot, update):
         for item in items:
             total_price = item['quantity'] * item['price']
             total = total + total_price
-            strings = '%s. %s %s (%s) = *%s* \n' % (i, item['name'], item['quantity'], item['price'], total_price)
+            strings = '%s. %s %s (%s) = *%s* \n' % (i, item['name'], item['quantity'], "{:,}".format(item['price']), "{:,}".format(total_price))
             message += strings
             i = i + 1
 
-        total_message = '------------- \n Total = *%s*' % (total)
+        total_message = '------------- \n Total = *%s*' % ("{:,}".format(total))
         message = message + total_message
 
     bot.send_message(
