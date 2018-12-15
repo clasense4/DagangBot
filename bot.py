@@ -154,6 +154,34 @@ def order(bot, update, args):
             parse_mode=telegram.ParseMode.MARKDOWN
         )
 
+def cart(bot, update):
+    user = db.table('backend_user').where('telegram_id', update.message.chat.id).first()
+    items = db.table('backend_cart') \
+        .join('backend_product', 'backend_product.id', '=', 'backend_cart.product_id') \
+        .where('backend_cart.user_id', user['id']).get()
+
+    if len(items) == 0:
+        message = '*Cart is empty*'
+    else:
+        message = '*Cart items* :\n'
+        i = 1
+        total = 0
+        for item in items:
+            total_price = item['quantity'] * item['price']
+            total = total + total_price
+            strings = '%s. %s %s (%s) = *%s* \n' % (i, item['name'], item['quantity'], item['price'], total_price)
+            message += strings
+            i = i + 1
+
+        total_message = '------------- \n Total = *%s*' % (total)
+        message = message + total_message
+
+    bot.send_message(
+        chat_id=update.message.chat_id,
+        text=message,
+        parse_mode=telegram.ParseMode.MARKDOWN
+    )
+
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
@@ -170,6 +198,7 @@ def main():
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("product", product))
     dp.add_handler(CommandHandler("order", order, pass_args=True))
+    dp.add_handler(CommandHandler("cart", cart))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
