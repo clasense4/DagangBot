@@ -25,3 +25,9 @@ class Cart(models.Model):
 
     def __str__(self):
         return '%s %s, %s : %s' % (self.user.first_name, self.user.last_name, self.product.name, self.quantity)
+
+    def price(self):
+        return '%s' % (self.product.price)
+
+    def total_price(self):
+        return '%s' % (int(self.product.price) * int(self.quantity))
