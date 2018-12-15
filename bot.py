@@ -50,6 +50,8 @@ Example: /order beton 100
 
 /cart           Product cart
 
+/empty          Remove items from cart
+
 /checkout       Checkout and receive invoice
 
 """
@@ -182,6 +184,22 @@ def cart(bot, update):
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 
+def cart_empty(bot, update):
+    user = db.table('backend_user').where('telegram_id', update.message.chat.id).first()
+    items = db.table('backend_cart').where('backend_cart.user_id', user['id']).get()
+
+    if len(items) == 0:
+        message = '*Cart is empty*'
+    else:
+        message = '*Items is removed from cart*'
+        db.table('backend_cart').where('backend_cart.user_id', user['id']).delete()
+
+    bot.send_message(
+        chat_id=update.message.chat_id,
+        text=message,
+        parse_mode=telegram.ParseMode.MARKDOWN
+    )
+
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
@@ -199,6 +217,7 @@ def main():
     dp.add_handler(CommandHandler("product", product))
     dp.add_handler(CommandHandler("order", order, pass_args=True))
     dp.add_handler(CommandHandler("cart", cart))
+    dp.add_handler(CommandHandler("empty", cart_empty))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
