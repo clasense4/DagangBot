@@ -239,6 +239,8 @@ def checkout(bot, update):
             }
             db.table('backend_paymentproduct').insert(payment_product)
 
+        db.table('backend_cart').where('backend_cart.user_id', user['id']).delete()
+
     bot.send_message(
         chat_id=update.message.chat_id,
         text=message,
