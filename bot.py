@@ -55,6 +55,8 @@ Example: /order beton 100
 
 /checkout       Checkout and receive invoice
 
+/status         Get Payment status
+
 """
 
 # Define a few command handlers. These usually take the two arguments bot and
@@ -218,7 +220,7 @@ def checkout(bot, update):
         payment = {
             'user_id': user['id'],
             'total': total,
-            'status': 1,
+            'status': 2,
             'created_at': datetime.datetime.now(),
             'updated_at': datetime.datetime.now()
         }
@@ -247,6 +249,23 @@ def checkout(bot, update):
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 
+def payment_statuses(code):
+    status = {
+        1 : 'Paid',
+        2 : 'Unpaid'
+    }
+    return status[code]
+
+def payment_status(bot, update):
+    user = db.table('backend_user').where('telegram_id', update.message.chat.id).first()
+    payment_status = db.table('backend_payment').where('user_id', user['id']).first()
+
+    message = '*Payment Status* \n Id : %s \n Status : %s' % (payment_status['id'], payment_statuses(payment_status['status']))
+    bot.send_message(
+        chat_id=update.message.chat_id,
+        text=message,
+        parse_mode=telegram.ParseMode.MARKDOWN
+    )
 
 def main():
     """Start the bot."""
@@ -267,6 +286,7 @@ def main():
     dp.add_handler(CommandHandler("cart", cart))
     dp.add_handler(CommandHandler("empty", cart_empty))
     dp.add_handler(CommandHandler("checkout", checkout))
+    dp.add_handler(CommandHandler("status", payment_status))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
