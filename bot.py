@@ -21,6 +21,7 @@ from orator import DatabaseManager, Model
 import telegram
 import logging
 import yaml
+import datetime
 
 # Load orator config
 with open("orator.yml", 'r') as stream:
@@ -80,7 +81,6 @@ def register(bot, update):
             update.message.reply_text('Already Registered.')
     except:
         print('something wrong, sorry')
-
 
 def help(bot, update):
     """Send a message when the command /help is issued."""
@@ -200,6 +200,52 @@ def cart_empty(bot, update):
         parse_mode=telegram.ParseMode.MARKDOWN
     )
 
+def checkout(bot, update):
+    user = db.table('backend_user').where('telegram_id', update.message.chat.id).first()
+    items = db.table('backend_cart') \
+        .join('backend_product', 'backend_product.id', '=', 'backend_cart.product_id') \
+        .where('backend_cart.user_id', user['id']).get()
+
+    if len(items) == 0:
+        message = '*Can not Checkout, Cart is empty*'
+    else:
+        message = '*Checkout* :\n'
+        total = 0
+        for item in items:
+            total_price = item['quantity'] * item['price']
+            total = total + total_price
+
+        payment = {
+            'user_id': user['id'],
+            'total': total,
+            'status': 1,
+            'created_at': datetime.datetime.now(),
+            'updated_at': datetime.datetime.now()
+        }
+        payment_id = db.table('backend_payment').insert_get_id(payment)
+
+        total_message = 'Total = *%s* \n' % ("{:,}".format(total))
+        message = message + total_message
+        payment_message = '------------- \n Pay to Bank Account Number : (BCA) 123123123'
+        message = message + payment_message
+
+        for item in items:
+            payment_product = {
+                'payment_id': payment_id,
+                'product_id': item['product_id'],
+                'quantity': item['quantity'],
+                'sub_total': item['quantity'] * item['price'],
+                'created_at': datetime.datetime.now()
+            }
+            db.table('backend_paymentproduct').insert(payment_product)
+
+    bot.send_message(
+        chat_id=update.message.chat_id,
+        text=message,
+        parse_mode=telegram.ParseMode.MARKDOWN
+    )
+
+
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
@@ -218,6 +264,7 @@ def main():
     dp.add_handler(CommandHandler("order", order, pass_args=True))
     dp.add_handler(CommandHandler("cart", cart))
     dp.add_handler(CommandHandler("empty", cart_empty))
+    dp.add_handler(CommandHandler("checkout", checkout))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
